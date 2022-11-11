@@ -51,7 +51,7 @@ export default function RegisterVideo() {
                                     X
                                 </button>
                                 <input 
-                                    placeholder="Titulo deo vídeo" 
+                                    placeholder="Titulo do vídeo" 
                                     name="titulo"
                                     values={formCadastro.values.titulo} 
                                     onChange={formCadastro.handleChange} 

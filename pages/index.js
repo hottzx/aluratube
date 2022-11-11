@@ -1,16 +1,32 @@
-import React from 'react';
+import React from "react";
 import config from "../config.json";
 import styled from "styled-components";
 import Menu from "../src/components/Menu/index";
 import { StyledTimeline } from "../src/components/Timeline";
+import { videoService } from "../src/services/videoService";
 
 function HomePage() {
-  const estiloDaHomePage = { 
-    //backgroundColor: "green" 
-};
-const [valorDoFiltro, setValorDoFiltro] = React.useState("");
+  const service = videoService();
+  const [valorDoFiltro, setValorDoFiltro] = React.useState("");
+  const [playlists, setPlaylists] = React.useState({}); // config playlists
 
-  //console.log(config.playlists);
+  React.useEffect(() => {
+    console.log("useEffect");
+    service.getAllVideos().then((dados) => {
+      console.log(dados.data);
+      // forma imutavel
+      const novasPlaylists = { ...playlists };
+      dados.data.forEach((video) => {
+        if (!novasPlaylists[video.playlist]) {
+          novasPlaylists[video.playlist] = [];
+        }
+        novasPlaylists[video.playlist].push(video);
+      });
+      setPlaylists(novasPlaylists);
+    });
+  }, []);
+
+  console.log("Playlists Pronto", playlists);
 
   return (
     <>
@@ -20,10 +36,13 @@ const [valorDoFiltro, setValorDoFiltro] = React.useState("");
           flexDirection: "column",
           flex: 1,
           // backgroundColor: "red",
-        }}>
-
-          {/* Prop Drilling */}
-        <Menu valorDoFiltro={valorDoFiltro} setValorDoFiltro={setValorDoFiltro} />
+        }}
+      >
+        {/* Prop Drilling */}
+        <Menu
+          valorDoFiltro={valorDoFiltro}
+          setValorDoFiltro={setValorDoFiltro}
+        />
         <Header />
         <Timeline searchValue={valorDoFiltro} playlists={config.playlists}>
           Conteúdo
@@ -40,7 +59,7 @@ export default HomePage;
 // }
 
 const StyledHeader = styled.div`
-  background-color: ${({ theme }) => theme.backgroundLevel1 };
+  background-color: ${({ theme }) => theme.backgroundLevel1};
 
   img {
     width: 80px;
@@ -78,7 +97,7 @@ function Header() {
   );
 }
 
-function Timeline({searchValue, ...props}) {
+function Timeline({ searchValue, ...props }) {
   //console.log("Dentro do componente", props.playlists);
   const playlistNames = Object.keys(props.playlists);
   // Statement
@@ -94,23 +113,24 @@ function Timeline({searchValue, ...props}) {
             <h2>{playlistName}</h2>
             <div>
               {videos
-              .filter((video) => {
-            const titleNormalized = video.title.toLowerCase(); 
-            const searchValueNormalized = searchValue.toLowerCase(); 
-            return titleNormalized.includes(searchValueNormalized)
-              })
-              .map((video) => {
-                return (
-                  <a key={video.url} href={video.url}>
-                    <img src={video.thumb} />
-                    <span>{video.title}</span>
-                  </a>
-                )
-              })};
+                .filter((video) => {
+                  const titleNormalized = video.title.toLowerCase();
+                  const searchValueNormalized = searchValue.toLowerCase();
+                  return titleNormalized.includes(searchValueNormalized);
+                })
+                .map((video) => {
+                  return (
+                    <a key={video.url} href={video.url}>
+                      <img src={video.thumb} />
+                      <span>{video.title}</span>
+                    </a>
+                  );
+                })}
+              ;
             </div>
           </section>
-        )
+        );
       })}
     </StyledTimeline>
-  )
+  );
 }
